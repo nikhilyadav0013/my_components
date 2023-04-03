@@ -24,18 +24,17 @@ const HomeScreen = ({ navigation }) => {
             fetchSearchResults()
         } else {
             setSearchResults([])
-        }
-
-        const getTrendingMovies = async () => {
-            try {
-                const response = await fetch(`${API_URL}/trending/movie/week?api_key=${API_KEY}`)
-                const data = await response.json()
-                setTrendingMovies(data.results)
-            } catch (error) {
-                console.error(error)
+            const getTrendingMovies = async () => {
+                try {
+                    const response = await fetch(`${API_URL}/trending/movie/week?api_key=${API_KEY}`)
+                    const data = await response.json()
+                    setTrendingMovies(data.results)
+                } catch (error) {
+                    console.error(error)
+                }
             }
+            getTrendingMovies()
         }
-        getTrendingMovies()
     }, [search])
 
     const renderSearchItem = ({ item }) => (
