@@ -13,7 +13,13 @@
 ## Getting Started
 
 1. Clone repository
+```
+git clone <repo-link>
+```
 2. Install the dependencies using yarn 
+```
+yarn
+```
 3. Start Metro server for application
 ```
 yarn start
