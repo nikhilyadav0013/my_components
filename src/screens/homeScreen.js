@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react"
-import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, FlatList, Image } from "react-native"
+import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, FlatList, Image, NativeModules } from "react-native"
 import { Searchbar, Card } from 'react-native-paper'
 import { API_KEY, API_URL } from "../utils"
+
+const { LocalStorage } = NativeModules
 
 const HomeScreen = ({ navigation }) => {
 
