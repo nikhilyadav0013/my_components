@@ -1,129 +1,152 @@
-import React, { useEffect, useState } from 'react'
-import { View, Text, SafeAreaView, FlatList, PermissionsAndroid } from 'react-native'
-import { Button, ActivityIndicator } from 'react-native-paper'
-import GeoPosition from 'react-native-geolocation-service'
-import { BleManager } from 'react-native-ble-plx'
+import React, { useState } from 'react'
+import { View, Text, SafeAreaView, FlatList, ScrollView, Dimensions, Image } from 'react-native'
+import { Card, IconButton } from 'react-native-paper'
+import Icon from 'react-native-vector-icons/Entypo'
+import { Header } from '../components/header'
+import { ProgressWithEmojis } from '../components/progress'
+import { Tile } from '../components/tile'
+import { Appointments } from '../components/appointment'
+import { DATA, DATA1, DATA2, DATA3, DATA4 } from '../demo'
 
-const bleManager = new BleManager()
+const HEIGHT = Dimensions.get('window').height
+const WIDTH = Dimensions.get('window').width
 
-const Screen1 = ({ navigation }) => {
+const Screen1 = () => {
 
-    const [location, setLocation] = useState('')
-    const [devices, setDevices] = useState([])
-    const [activity, setActivity] = useState(false)
+    const [visible, setVisible] = useState(true)
 
-    useEffect(() => {
-        requestGeolocation()
-
-    }, [])
-
-    const requestBluetooth = () => {
-
-        // Start Bluetooth scanning
-        bleManager.startDeviceScan(null, null, (error, device) => {
-            if (error) {
-                // Handle error
-                return
-            }
-
-            // Extract MAC ID and RSSI from scan result
-            const { id, rssi } = device
-
-            // Update devices state with new scan result
-            setDevices(prevDevices => {
-                // Check if device already exists in devices state
-                const existingDevice = prevDevices.find(prevDevice => prevDevice.id === id)
-
-                if (existingDevice) {
-                    // Update RSSI of existing device
-                    return prevDevices.map(prevDevice =>
-                        prevDevice.id === id ? { ...prevDevice, rssi } : prevDevice
-                    );
-                } else {
-                    // Add new device to devices state
-                    return [...prevDevices, { id, rssi }]
-                }
-            })
-        })
-    }
-
-    const stopBluetoothScan = () => {
-        bleManager.stopDeviceScan()
-    }
-
-    const requestGeolocation = async () => {
-        try {
-            const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-                {
-                    title: 'Geolocation Permission',
-                    message:
-                        'App needs access to your Geolocation ',
-                    buttonNeutral: 'Ask Me Later',
-                    buttonNegative: 'Cancel',
-                    buttonPositive: 'OK',
-                }
-            )
-            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                // console.log('Success')
-            } else {
-                // console.log('Permission denied')
-            }
-        } catch (err) {
-            console.warn(err)
-        }
-    }
-
-    const getLocation = () => {
-
-        GeoPosition.getCurrentPosition(
-            position => {
-                console.log(position)
-                setLocation(position)
-            },
-            error => {
-                console.log(error.code, error.message)
-                setLocation(false)
-            },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    const renderItem = ({ item }) => {
+        return (
+            <View style={{ padding: 15 }}>
+                <Image source={{ uri: item.img }}
+                    style={{ height: HEIGHT * 0.15, width: WIDTH * 0.22, resizeMode: 'contain' }}
+                />
+                <Text style={{ color: '#000', alignSelf: 'center' }}>{item.name}</Text>
+            </View>
         )
     }
-    console.log(devices)
+
+    const renderItem1 = ({ item }) => {
+        return (
+            <View style={{ padding: 15 }}>
+                <Image source={{ uri: item.img }}
+                    style={{ height: HEIGHT * 0.15, width: WIDTH * 0.22, resizeMode: 'contain' }}
+                />
+                <Text style={{ color: '#000', alignSelf: 'center' }}>{item.text}</Text>
+            </View>
+        )
+    }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
             <View style={{ flex: 1 }}>
-                {activity ? <ActivityIndicator animating={activity} color='blue' style={{ top: 50 }} size='large' /> :
+                <Header />
+                <ScrollView style={{ flex: 1 }}>
+                    <Text style={{ color: 'green', marginLeft: 15 }}>Friday, 4 Sep</Text>
+                    <Text style={{ color: 'green', fontWeight: 'bold', fontSize: 25, marginLeft: 15 }}>Namaste, Angela</Text>
+                    {visible ?
+                        <>
+                            <Card style={{ margin: 15, height: HEIGHT * 0.25 }}>
+                                <Card.Content>
+                                    <IconButton
+                                        icon="close"
+                                        iconColor='grey'
+                                        style={{ position: 'absolute', right: 0 }}
+                                        size={25}
+                                        onPress={() => setVisible(false)}
+                                    />
+                                    <View style={{ height: '100%', justifyContent: 'space-around' }}>
+                                        <Text style={{ color: 'green', fontSize: 20 }}>
+                                            How are you <Text style={{ fontWeight: 'bold' }}>feeling</Text> today?
+                                        </Text>
+                                        <ProgressWithEmojis />
+                                    </View>
+                                </Card.Content>
+                            </Card>
+                        </> : <></>
+                    }
+                    <Tile iconFirst={'power-sleep'} text={'You slept for'} textBold={'8 hours'} iconLast={'autorenew'} />
+                    <Tile iconFirst={'shoe-print'} text={'You walked'} textBold={'1200 steps'} iconLast={'autorenew'} />
+                    <Tile iconFirst={'clock'} text={'Screen time is'} textBold={'5 hours'} iconLast={'autorenew'} />
+                    <Tile iconFirst={'heart-pulse'} text={'Connect you'} textBold={'Health App'} iconLast={'plus'} />
+                    <View style={{ flexDirection: 'row' }}>
+                        <Text style={{ color: 'green', fontWeight: 'bold', fontSize: 20, marginLeft: 15 }}>
+                            Shop for Health  & Beauty
+                        </Text>
+                        <Icon icon='chevron-right' size={25} color='green' />
+                    </View>
                     <FlatList
-                        data={devices}
-                        renderItem={({ item }) => (
-                            <View>
-                                <Text style={{ color: '#000', alignSelf: 'center' }}>MAC ID: {item.id}</Text>
-                                <Text style={{ color: '#000', alignSelf: 'center' }}>RSSI: {item.rssi}</Text>
-                            </View>
-                        )}
-                        keyExtractor={(item, index) => `${item.id}-${index}`}
+                        data={DATA}
+                        keyExtractor={item => item.name}
+                        horizontal={true}
+                        renderItem={renderItem}
                     />
-                }
-
-
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={{ color: 'green', fontWeight: 'bold', fontSize: 20, marginLeft: 15 }}>
+                            Upcoming Appointments
+                        </Text>
+                        <Text style={{ fontSize: 15, color: 'green', alignSelf: 'center', right: 10 }}>Clear</Text>
+                    </View>
+                    <Appointments />
+                    <Text style={{ color: 'green', fontWeight: 'bold', fontSize: 20, marginLeft: 15 }}>
+                        Recent Orders
+                    </Text>
+                    <FlatList
+                        data={DATA1}
+                        horizontal={true}
+                        renderItem={({ item }) => {
+                            return (
+                                <View style={{ elevation: 5 }}>
+                                    <Image source={item.img}
+                                        style={{ height: HEIGHT * 0.3, width: WIDTH * 0.8, resizeMode: 'contain', margin: 10 }}
+                                    />
+                                </View>
+                            )
+                        }}
+                    />
+                    <Text style={{ color: 'green', fontWeight: 'bold', fontSize: 20, marginLeft: 15 }}>
+                        Amrutam Blog
+                    </Text>
+                    <FlatList
+                        data={DATA2}
+                        horizontal={true}
+                        renderItem={({ item }) => {
+                            return (
+                                <View style={{ elevation: 5 }}>
+                                    <Image source={item.img}
+                                        style={{ height: HEIGHT * 0.3, width: WIDTH * 0.8, resizeMode: 'contain', margin: 10 }}
+                                    />
+                                </View>
+                            )
+                        }}
+                    />
+                    <Text style={{ color: 'green', fontWeight: 'bold', fontSize: 20, marginLeft: 15 }}>
+                        What are you looking for?
+                    </Text>
+                    <FlatList
+                        data={DATA3}
+                        horizontal={true}
+                        renderItem={renderItem1}
+                    />
+                    <Text style={{ color: 'green', fontWeight: 'bold', fontSize: 20, marginLeft: 15 }}>
+                        Top Rated Doctors
+                    </Text>
+                    <FlatList
+                        data={DATA4}
+                        horizontal={true}
+                        renderItem={({ item }) => {
+                            return (
+                                <View style={{ elevation: 5 }}>
+                                    <Image source={item.img}
+                                        style={{ height: HEIGHT * 0.3, width: WIDTH * 0.5, resizeMode: 'contain', margin: 10 }}
+                                    />
+                                </View>
+                            )
+                        }}
+                    />
+                </ScrollView>
             </View>
-            <View style={{ flex: 1, justifyContent: 'space-around' }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                    <Button mode='outlined' onPress={() => { requestBluetooth, setActivity(true) }} >Start</Button>
-                    <Button mode='outlined' onPress={() => { stopBluetoothScan, setActivity(false) }} >Stop</Button>
-                </View>
-                <Text style={{ color: '#000', alignSelf: 'center', fontSize: 15 }}>
-                    Latitude:{`\n`} {location ? location.coords.latitude : null}
-                </Text>
-                <Text style={{ color: '#000', alignSelf: 'center', fontSize: 15 }}>
-                    Longitude:{`\n`} {location ? location.coords.longitude : null}
-                </Text>
-                <Button mode='outlined' onPress={getLocation} style={{ width: '50%', alignSelf: 'center' }}>
-                    Get Location
-                </Button>
-            </View>
-        </SafeAreaView >
+        </SafeAreaView>
     )
 }
 
